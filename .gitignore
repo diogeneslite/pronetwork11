@@ -1,0 +1,19 @@
+# PowerShell
+*.log
+*.tmp
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.swp
+*~
+
+# Scratch & Gemini IDE artifacts
+.gemini/
+.agents/
