@@ -37,11 +37,6 @@ $null = Import-Module (Join-Path $scriptDir "Modules\NetworkBenchmarks.psm1") -P
 $null = Import-Module (Join-Path $scriptDir "Modules\DeviceScanner.psm1") -PassThru -Force -DisableNameChecking
 $null = Import-Module (Join-Path $scriptDir "Modules\RouterSecurity.psm1") -PassThru -Force -DisableNameChecking
 
-
-
-
-
-
 function Show-DashboardHeader {
     param([PSCustomObject]$NetInfo)
 

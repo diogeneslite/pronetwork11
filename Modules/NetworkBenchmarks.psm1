@@ -16,7 +16,7 @@ if (-not (Get-Command Write-BenchmarkRow -ErrorAction SilentlyContinue)) {
 function Invoke-AllNetworkBenchmarks {
     [CmdletBinding()]
     param(
-        [string]$GatewayIp = "192.168.1.2",
+        [string]$GatewayIp = "192.168.1.1",
         [string[]]$DnsServers = @("1.1.1.1")
     )
 

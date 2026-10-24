@@ -33,7 +33,7 @@ function Test-PortOpen {
 function Get-RouterOverview {
     [CmdletBinding()]
     param(
-        [string]$GatewayIp = "192.168.1.2"
+        [string]$GatewayIp = "192.168.1.1"
     )
 
     $report = [PSCustomObject]@{

@@ -102,12 +102,6 @@ function Get-SmartDeviceIdentity {
     }
 
     $cleanMac = if ($Mac) { $Mac.ToUpper().Replace(":", "-") } else { "" }
-    if ($cleanMac -eq "6E-69-11-1C-A3-1C") {
-        return "mohamed's iPhone (Apple iPhone18,1)"
-    }
-    if ($cleanMac -eq "E8-CA-C8-DC-24-32") {
-        return "BeyondTV (Android Smart TV / Google Cast)"
-    }
 
     # 1. Instant MAC OUI lookup
     $vendor = Get-VendorFromMac -Mac $Mac
@@ -148,10 +142,18 @@ function Get-LiveKernelBytes {
 function Get-ConnectedNetworkDevices {
     [CmdletBinding()]
     param(
-        [string]$LocalIp = "192.168.1.4",
-        [string]$GatewayIp = "192.168.1.2",
+        [string]$LocalIp = "",
+        [string]$GatewayIp = "",
         [switch]$DeepScan
     )
+
+    if (-not $LocalIp -or -not $GatewayIp) {
+        if (Get-Command Get-ProNetworkOverview -ErrorAction SilentlyContinue) {
+            $overview = Get-ProNetworkOverview
+            if (-not $LocalIp) { $LocalIp = $overview.LocalIPv4 }
+            if (-not $GatewayIp) { $GatewayIp = $overview.GatewayIPv4 }
+        }
+    }
 
     try {
         if ($LocalIp -match '^(\d+\.\d+\.\d+)\.\d+$') {
@@ -161,7 +163,7 @@ function Get-ConnectedNetworkDevices {
             if ($GatewayIp) { [void]$ping.Send($GatewayIp, 100) }
             
             if ($DeepScan) {
-                $sampleIps = @(1, 2, 3, 4, 5, 7, 10, 20, 50, 100, 101, 102, 200, 254) | ForEach-Object { "$base.$_" }
+                $sampleIps = @(1, 2, 3, 4, 5, 10, 20, 50, 100, 101, 102, 200, 254) | ForEach-Object { "$base.$_" }
                 foreach ($sip in $sampleIps) {
                     try { [void]$ping.Send($sip, 40) } catch {}
                 }
@@ -314,10 +316,18 @@ function Render-BandwidthMovementGraph {
 function Start-RealTimeBandwidthMonitor {
     [CmdletBinding()]
     param(
-        [string]$LocalIp = "192.168.1.4",
-        [string]$GatewayIp = "192.168.1.2",
+        [string]$LocalIp = "",
+        [string]$GatewayIp = "",
         [int]$RefreshMs = 800
     )
+
+    if (-not $LocalIp -or -not $GatewayIp) {
+        if (Get-Command Get-ProNetworkOverview -ErrorAction SilentlyContinue) {
+            $overview = Get-ProNetworkOverview
+            if (-not $LocalIp) { $LocalIp = $overview.LocalIPv4 }
+            if (-not $GatewayIp) { $GatewayIp = $overview.GatewayIPv4 }
+        }
+    }
 
     $ESC = [char]27
     $C_RESET = "$ESC[0m"

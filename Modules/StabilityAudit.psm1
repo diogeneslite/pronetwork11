@@ -11,7 +11,7 @@ param()
 function Test-GatewayStability {
     [CmdletBinding()]
     param(
-        [string]$GatewayIp = "192.168.1.2",
+        [string]$GatewayIp = "192.168.1.1",
         [int]$Count = 25
     )
 
@@ -95,7 +95,7 @@ function Test-GatewayStability {
 function Test-DnsBenchmark {
     [CmdletBinding()]
     param(
-        [string[]]$LocalDnsServers = @("192.168.1.2")
+        [string[]]$LocalDnsServers = @("1.1.1.1")
     )
 
     $testHostnames = @("google.com", "cloudflare.com", "microsoft.com", "github.com")
@@ -161,10 +161,10 @@ function Test-DnsBenchmark {
 function Invoke-FullStabilityAudit {
     [CmdletBinding()]
     param(
-        [string]$GatewayIp = "192.168.1.2",
+        [string]$GatewayIp = "192.168.1.1",
         [string[]]$DnsServers = @("1.1.1.1"),
         [string]$ConnectionType = "Wi-Fi",
-        [string]$LinkSpeed = "350 Mbps"
+        [string]$LinkSpeed = "Auto"
     )
 
     $audit = [PSCustomObject]@{

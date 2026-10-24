@@ -1,19 +1,28 @@
-# PowerShell
+# PowerShell & Execution Logs
 *.log
 *.tmp
+*.bak
+*.orig
+*.rej
 
-# Windows
+# Windows OS
 Thumbs.db
 ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
-# IDE / Editor files
+# macOS
+.DS_Store
+
+# IDE & Editor Configurations
 .vscode/
 .idea/
 *.swp
+*.swo
 *~
+*.suo
+*.user
 
-# Scratch & Gemini IDE artifacts
+# Antigravity & Agent Scratch Artifacts
 .gemini/
 .agents/

@@ -18,26 +18,7 @@ if (-not (Get-Command Get-RouterNameFromMac -ErrorAction SilentlyContinue)) {
 
 # Session cache for persistent device identities across scans
 if (-not $script:DEVICE_IDENTITY_CACHE) {
-    $script:DEVICE_IDENTITY_CACHE = @{
-        "6E-69-11-1C-A3-1C" = @{
-            Hostname   = "mohamed's iPhone"
-            DeviceType = "Smartphone (Apple iPhone)"
-            Vendor     = "Apple Inc."
-            Model      = "Apple iPhone (iPhone18,1)"
-            OS         = "iOS (iPhone OS)"
-            IsApple    = $true
-            IsPrivate  = $true
-        }
-        "E8-CA-C8-DC-24-32" = @{
-            Hostname   = "BeyondTV"
-            DeviceType = "Smart TV / Media Player (Android TV / Cast)"
-            Vendor     = "Bilian / Smart TV Device"
-            Model      = "BeyondTV Android Smart TV"
-            OS         = "Android TV OS"
-            IsApple    = $false
-            IsPrivate  = $false
-        }
-    }
+    $script:DEVICE_IDENTITY_CACHE = @{}
 }
 
 # Dictionary of standard hostable web pages and directories
@@ -487,9 +468,15 @@ function Resolve-DeviceIdentity {
 function Invoke-LocalNetworkDiscovery {
     [CmdletBinding()]
     param(
-        [string]$LocalIp = "192.168.1.4",
-        [string]$GatewayIp = "192.168.1.2"
+        [string]$LocalIp = "",
+        [string]$GatewayIp = ""
     )
+
+    if (-not $LocalIp -or -not $GatewayIp) {
+        $overview = Get-ProNetworkOverview
+        if (-not $LocalIp) { $LocalIp = $overview.LocalIPv4 }
+        if (-not $GatewayIp) { $GatewayIp = $overview.GatewayIPv4 }
+    }
 
     Write-SectionTitle "PATH 2: LOCAL NETWORK DEVICE DISCOVERY & WEB AUDIT" "[+]"
     Write-Host "   ${global:C_BLUE}Discovering active clients, identifying Apple & smart devices, port mapping & inspecting web portals...${global:C_RESET}`n"
@@ -500,8 +487,8 @@ function Invoke-LocalNetworkDiscovery {
             $base = $matches[1]
             $ping = New-Object System.Net.NetworkInformation.Ping
             [void]$ping.Send("$base.255", 60)
-            [void]$ping.Send($GatewayIp, 80)
-            @(1, 2, 3, 4, 5, 7, 10, 20, 50, 100, 254) | ForEach-Object {
+            if ($GatewayIp) { [void]$ping.Send($GatewayIp, 80) }
+            @(1, 2, 3, 4, 5, 10, 20, 50, 100, 254) | ForEach-Object {
                 try { [void]$ping.Send("$base.$_", 30) } catch {}
             }
             $ping.Dispose()

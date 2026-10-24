@@ -69,11 +69,11 @@ function Get-FriendlyUserName {
     $rawUser = $env:USERNAME
     $hostname = $env:COMPUTERNAME
     
-    # Capitalize username for human-friendly greeting (e.g. moham -> Mohamed)
-    $name = if ($rawUser.ToLower() -eq "moham") {
-        "Mohamed"
-    } else {
+    # Capitalize username for human-friendly greeting
+    $name = if ($rawUser) {
         (Get-Culture).TextInfo.ToTitleCase($rawUser.ToLower())
+    } else {
+        "User"
     }
     return "$name ($hostname\$rawUser)"
 }

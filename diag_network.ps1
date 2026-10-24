@@ -2,22 +2,37 @@
 ================================================================================
  ProNetwork11 - Router API & Hostname Resolution Diagnostics
  Author: diogeneslite (https://github.com/diogeneslite)
+ Description: Diagnostic script to test router APIs, UPnP discovery and hostname resolution
 ================================================================================
 #>
-# Diagnostic script to test router APIs and Device Hostname resolution
-$gatewayIp = "192.168.1.2"
-$sampleDeviceIp = "192.168.1.3"
-$device7Ip = "192.168.1.7"
+[CmdletBinding()]
+param(
+    [string]$GatewayIp,
+    [string]$TargetIp
+)
 
-Write-Host "=== 1. Testing Router ($gatewayIp) ==="
-# Test Huawei HiLink API
+# Auto-detect default gateway if not specified
+if (-not $GatewayIp) {
+    try {
+        $GatewayIp = (Get-NetRoute -DestinationPrefix '0.0.0.0/0' -ErrorAction SilentlyContinue | Select-Object -First 1).NextHop
+    } catch {}
+    if (-not $GatewayIp) { $GatewayIp = "192.168.1.1" }
+}
+
+if (-not $TargetIp) {
+    $TargetIp = $GatewayIp
+}
+
+Write-Host "=== 1. Testing Router Gateway ($GatewayIp) ===" -ForegroundColor Cyan
+
+# Test HiLink / Router REST API endpoint
 try {
     $wc = New-Object System.Net.WebClient
     $wc.Timeout = 1500
-    $res = $wc.DownloadString("http://$gatewayIp/api/monitoring/traffic-statistics")
-    Write-Host "Huawei Traffic Stats: $res"
+    $res = $wc.DownloadString("http://$GatewayIp/api/monitoring/traffic-statistics")
+    Write-Host "Router Traffic Stats API: $res" -ForegroundColor Green
 } catch {
-    Write-Host "Huawei API Error: $($_.Exception.Message)"
+    Write-Host "Router API Note: $($_.Exception.Message)" -ForegroundColor DarkGray
 }
 
 # Test SSDP / UPnP Discovery
@@ -31,27 +46,20 @@ try {
     $remoteEp = New-Object System.Net.IPEndPoint([System.Net.IPAddress]::Any, 0)
     $recv = $udp.Receive([ref]$remoteEp)
     $respStr = [System.Text.Encoding]::ASCII.GetString($recv)
-    Write-Host "UPnP Response from $($remoteEp.Address):`n$respStr"
+    Write-Host "UPnP Response from $($remoteEp.Address):`n$respStr" -ForegroundColor Green
     $udp.Close()
 } catch {
-    Write-Host "UPnP SSDP Error: $($_.Exception.Message)"
+    Write-Host "UPnP SSDP: $($_.Exception.Message)" -ForegroundColor DarkGray
 }
 
-Write-Host "`n=== 2. Testing Device Hostname Resolution for $sampleDeviceIp and $device7Ip ==="
-# Test nbtstat
-Write-Host "nbtstat -A $sampleDeviceIp :"
-$nbt1 = nbtstat -A $sampleDeviceIp
-Write-Host ($nbt1 -join "`n")
+Write-Host "`n=== 2. Testing Device Hostname Resolution for Target ($TargetIp) ===" -ForegroundColor Cyan
 
-Write-Host "`nnbtstat -A $device7Ip :"
-$nbt2 = nbtstat -A $device7Ip
-Write-Host ($nbt2 -join "`n")
+# Test NetBIOS status
+Write-Host "nbtstat -A $TargetIp :"
+$nbt = nbtstat -A $TargetIp 2>&1
+Write-Host ($nbt -join "`n")
 
-# Test ping -a
-Write-Host "`nping -a $sampleDeviceIp :"
-$p1 = ping -a -n 1 -w 500 $sampleDeviceIp
-Write-Host ($p1 -join "`n")
-
-Write-Host "`nping -a $device7Ip :"
-$p2 = ping -a -n 1 -w 500 $device7Ip
-Write-Host ($p2 -join "`n")
+# Test Reverse DNS via Ping
+Write-Host "`nping -a $TargetIp :"
+$p = ping -a -n 1 -w 500 $TargetIp 2>&1
+Write-Host ($p -join "`n")
