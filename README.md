@@ -7,6 +7,8 @@
 
 > **Zero-Setup, In-Place Windows 11 Network Intelligence & Diagnostic Operations Toolkit**  
 > An all-in-one, terminal-friendly dashboard to test speed, find connected devices, and secure your router.
+>
+> (I have zero coding knowledgem I just vibe coded this since I really needed such a script in my daily use of wifi on windows)
 
 ---
 
